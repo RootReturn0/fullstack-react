@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react'
-
 import personService from './services/persons'
 
-const Persons = ({ persons, initPersons }) => {
-  const removePerson = (person) => {
-    if (window.confirm(`Delete ${person.name}?`)) {
-      personService
-        .remove(person.id)
-        .then(() => initPersons())
-    }
-  }
+import './index.css'
+
+const Persons = ({ persons, removePerson }) => {
+
   return persons.map(person => (
     <p key={person.name}>{person.name} {person.number} <button onClick={() => removePerson(person)} >delete</button></p>
   ))
@@ -23,12 +18,25 @@ const Filter = ({ search, handleSearchChange }) => {
   )
 }
 
+const Notification = ({ message }) => {
+  if (message.content === null) {
+    return
+  }
+
+  return (
+    <div className={message.type}>
+      {message.content}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [personToShow, setPersonToShow] = useState(persons)
   const [search, setSearch] = useState('')
+  const [message, setMessage] = useState({'content': null, 'type': 'success'})
 
   const initPersons = () => {
     personService.getAll().then(data => { setPersons(data), setPersonToShow(data) })
@@ -43,7 +51,10 @@ const App = () => {
       if (window.confirm(`${newPerson.name} is already added to phonebook, replace the old number with a new one?`)) {
         personService
           .update(existingPerson.id, newPerson)
-          .then(() => initPersons())
+          .then(() => {
+            initPersons()
+            setMessage({'content': `Information of ${newPerson.name} has been changed`, 'type': 'success'})
+          })
       }
       return
     }
@@ -51,9 +62,21 @@ const App = () => {
     personService.create(newPerson).then(data => {
       setPersons(persons.concat(data))
       setPersonToShow(persons.concat(data))
+      setMessage({'content': `Added ${newPerson.name}`, 'type': 'success'})
     })
     setNewName('')
     setNewNumber('')
+  }
+
+  const removePerson = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .remove(person.id)
+        .then(() => {
+          initPersons()
+          setMessage({'content': `Information of ${person.name} has been removed from server`, 'type': 'error'})
+        })
+    }
   }
 
   const handleSearchChange = (event) => {
@@ -73,6 +96,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message}/>
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <form onSubmit={addPerson}>
@@ -85,7 +109,7 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-      <Persons persons={personToShow} initPersons={initPersons} />
+      <Persons persons={personToShow} removePerson={removePerson} />
     </div>
   )
 }
