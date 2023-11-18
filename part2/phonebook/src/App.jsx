@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react'
 
-const Persons = ({ persons }) => (
-  persons.map(person => (
-    <p key={person.name}>{person.name} {person.number}</p>
+import personService from './services/persons'
+
+const Persons = ({ persons, initPersons }) => {
+  const removePerson = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .remove(person.id)
+        .then(() => initPersons())
+    }
+  }
+  return persons.map(person => (
+    <p key={person.name}>{person.name} {person.number} <button onClick={() => removePerson(person)} >delete</button></p>
   ))
-)
+}
 
 const Filter = ({ search, handleSearchChange }) => {
   return (
@@ -21,22 +30,28 @@ const App = () => {
   const [personToShow, setPersonToShow] = useState(persons)
   const [search, setSearch] = useState('')
 
-  const initDataHook = () => {
-    console.log('effect')
-    const url = 'http://localhost:3001/persons'
-    fetch(url)
-      .then(response => response.json())
-      .then(data => { setPersons(data), setPersonToShow(data) })
+  const initPersons = () => {
+    personService.getAll().then(data => { setPersons(data), setPersonToShow(data) })
   }
-  useEffect(initDataHook, [])
+  useEffect(initPersons, [])
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.find(p => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    const newPerson = { name: newName, number: newNumber }
+    const existingPerson = persons.find(p => p.name === newName)
+    if (existingPerson) {
+      if (window.confirm(`${newPerson.name} is already added to phonebook, replace the old number with a new one?`)) {
+        personService
+          .update(existingPerson.id, newPerson)
+          .then(() => initPersons())
+      }
       return
     }
-    setPersons([...persons, { name: newName, number: newNumber }])
+
+    personService.create(newPerson).then(data => {
+      setPersons(persons.concat(data))
+      setPersonToShow(persons.concat(data))
+    })
     setNewName('')
     setNewNumber('')
   }
@@ -70,7 +85,7 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-      <Persons persons={personToShow} />
+      <Persons persons={personToShow} initPersons={initPersons} />
     </div>
   )
 }
