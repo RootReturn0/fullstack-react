@@ -2,9 +2,9 @@
   "dependencies": {
     "mongoose": "^8.0.1"
   },
-  "name": "phonebook-backend-db",
+  "name": "command-line-database",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "mongo.js",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
