@@ -36,7 +36,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [personToShow, setPersonToShow] = useState(persons)
   const [search, setSearch] = useState('')
-  const [message, setMessage] = useState({'content': null, 'type': 'success'})
+  const [message, setMessage] = useState({ 'content': null, 'type': 'success' })
 
   const initPersons = () => {
     personService.getAll().then(data => { setPersons(data), setPersonToShow(data.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))) })
@@ -53,7 +53,10 @@ const App = () => {
           .update(existingPerson.id, newPerson)
           .then(() => {
             initPersons()
-            setMessage({'content': `Information of ${newPerson.name} has been changed`, 'type': 'success'})
+            setMessage({ 'content': `Information of ${newPerson.name} has been changed`, 'type': 'success' })
+          }).catch(error => {
+            // this is the way to access the error message
+            setMessage({ 'content': error.response.data.error, 'type': 'error' })
           })
       }
       return
@@ -63,10 +66,14 @@ const App = () => {
       const newPersons = persons.concat(data)
       setPersons(newPersons)
       setPersonToShow(newPersons.filter(p => p.name.toLowerCase().includes(search.toLowerCase())))
-      setMessage({'content': `Added ${newPerson.name}`, 'type': 'success'})
+      setMessage({ 'content': `Added ${newPerson.name}`, 'type': 'success' })
+      setNewName('')
+      setNewNumber('')
+    }).catch(error => {
+      // this is the way to access the error message
+      setMessage({ 'content': error.response.data.error, 'type': 'error' })
     })
-    setNewName('')
-    setNewNumber('')
+
   }
 
   const removePerson = (person) => {
@@ -75,7 +82,7 @@ const App = () => {
         .remove(person.id)
         .then(() => {
           initPersons()
-          setMessage({'content': `Information of ${person.name} has been removed from server`, 'type': 'error'})
+          setMessage({ 'content': `Information of ${person.name} has been removed from server`, 'type': 'error' })
         })
     }
   }
@@ -97,7 +104,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={message}/>
+      <Notification message={message} />
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <form onSubmit={addPerson}>

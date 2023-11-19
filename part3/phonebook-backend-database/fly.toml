@@ -1,16 +1,15 @@
-# fly.toml app configuration file generated for phonebook-backend-return0 on 2023-11-19T02:43:17+02:00
+# fly.toml app configuration file generated for phonebook-backend-database-return0 on 2023-11-19T05:47:18+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "phonebook-backend-return0"
+app = "phonebook-backend-database-return0"
 primary_region = "ams"
 
 [build]
 
 [env]
-  PORT = "3000" # add this
-  VITE_PORT = "3000"
+  PORT = "3000"
 
 [http_service]
   internal_port = 3000
