@@ -153,3 +153,31 @@ test('blog without likes defaults to 0', async () => {
     expect(response.body.likes).toBe(0)
 })
 
+test('delete blog', async () => {
+    await api.delete('/api/blogs/5a422bc61b54a676234d17fc')
+        .expect(204)
+
+    const response = await api.get('/api/blogs')
+
+    const contents = response.body.map(r => r.title)
+
+    expect(response.body).toHaveLength(initialBlogs.length - 1)
+    expect(contents).not.toContain('Type wars')
+})
+
+test('update blog', async () => {
+    const newBlog = {
+        // _id: "5a422a851b54a676234d17f7",
+        title: "React patterns",
+        author: "Michael Chan",
+        url: "https://reactpatterns.com/",
+        likes: 17,
+        __v: 0
+    }
+
+    response = await api.put('/api/blogs/5a422a851b54a676234d17f7')
+        .send(newBlog)
+        .expect(200)
+
+    expect(response.body.likes).toBe(17)
+})
