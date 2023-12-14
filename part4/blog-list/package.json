@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest --verbose",
+    "start": "NODE_ENV=production node index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
+    "test": "NODE_ENV=test jest --verbose",
     "build:ui": "rm -rf static && cd ../phonebook-frontend/ && npm run build && cp -r dist ../phonebook-backend-database && mv ../phonebook-backend-database/dist ../phonebook-backend-database/static",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
@@ -26,7 +26,8 @@
     "@flydotio/dockerfile": "^0.4.10",
     "eslint": "^8.54.0",
     "jest": "^29.7.0",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
   },
   "jest": {
     "testEnvironment": "node"
