@@ -31,16 +31,49 @@ const App = () => {
     setBlogs(sortedBlogs)
   }
 
+
   const concatBlogs = (blogObject) => {
     blogObject.user = user
     const newBlogs = blogs.concat(blogObject)
     setAndSortBlogs(newBlogs)
   }
 
-  const removeBlog = (blog) => {
-    console.log('remove blog', blog)
-    const newBlogs = blogs.filter(b => b.id !== blog.id)
-    setBlogs(newBlogs)
+  const addBlog = async (blogObject) => {
+    try {
+      const savedBlog = await blogService.create(blogObject)
+      concatBlogs(savedBlog)
+      setMessage({ 'content': `a new blog ${savedBlog.title} by ${savedBlog.author} added`, 'type': 'success' })
+      return true
+    } catch (exception) {
+      setMessage({ 'content': 'could not add blog', 'type': 'error' })
+      setTimeout(() => {
+        setMessage({ 'content': null, 'type': 'success' })
+      }, 3000)
+      return false
+    }
+  }
+
+  const updateBlog = async (blogObject) => {
+    try {
+      const updatedBlog = await blogService.update(blogObject)
+      setMessage({ 'content': `blog ${updatedBlog.title} by ${updatedBlog.author} updated`, 'type': 'success' })
+    } catch (exception) {
+      console.log(exception)
+      setMessage({ 'content': 'could not update blog', 'type': 'error' })
+    }
+  }
+
+
+  const removeBlog =  async (blogObject) => {
+    event.preventDefault()
+    try {
+      await blogService.remove(blogObject)
+      const newBlogs = blogs.filter(b => b.id !== blogObject.id)
+      setBlogs(newBlogs)
+      setMessage({ 'content': `blog ${blogObject.title} by ${blogObject.author} removed`, 'type': 'success' })
+    } catch (exception) {
+      setMessage({ 'content': 'could not remove blog', 'type': 'error' })
+    }
   }
 
   useEffect(() => {
@@ -124,7 +157,7 @@ const App = () => {
       <h2>blogs</h2>
       <p>{user.name} logged in <button onClick={() => handleLogout()}>logout</button></p>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} setMessage={setMessage} removeBlog={removeBlog} />
+        <Blog key={blog.id} blog={blog} setMessage={setMessage} updateBlog={updateBlog} removeBlog={removeBlog} />
       )}
     </div>
   )
@@ -134,7 +167,7 @@ const App = () => {
       <Notification message={message} />
       {!user && loginForm()}
       {user && blogList()}
-      {user && <CreateBlogForm concatBlogs={concatBlogs} setMessage={setMessage} />}
+      {user && <CreateBlogForm concatBlogs={concatBlogs} setMessage={setMessage} addBlog={addBlog} />}
     </div>
   )
 }

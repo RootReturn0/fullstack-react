@@ -2,7 +2,7 @@ import { useState } from 'react'
 import blogService from '../services/blogs'
 
 
-const Blog = ({ blog, setMessage, removeBlog }) => {
+const Blog = ({ blog, setMessage, removeBlog, updateBlog }) => {
   const [visible, setVisible] = useState(false)
   const hideWhenVisible = { display: visible ? 'none' : '' }
   const showWhenVisible = { display: visible ? '' : 'none' }
@@ -24,26 +24,14 @@ const Blog = ({ blog, setMessage, removeBlog }) => {
 
   const like = async (blog) => {
     blog.likes += 1
-    try {
-      const updatedBlog = await blogService.update(blog)
-      setMessage({ 'content': `blog ${updatedBlog.title} by ${updatedBlog.author} updated`, 'type': 'success' })
-    } catch (exception) {
-      console.log(exception)
-      setMessage({ 'content': 'could not update blog', 'type': 'error' })
-    }
+    updateBlog(blog)
   }
 
   const remove = async (blog) => {
-    try {
-      if (!window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
-        return
-      }
-      await blogService.remove(blog)
-      removeBlog(blog)
-      setMessage({ 'content': `blog ${blog.title} by ${blog.author} removed`, 'type': 'success' })
-    } catch (exception) {
-      setMessage({ 'content': 'could not remove blog', 'type': 'error' })
+    if (!window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
+      return
     }
+    removeBlog(blog)
   }
 
   return <div style={{
@@ -53,10 +41,11 @@ const Blog = ({ blog, setMessage, removeBlog }) => {
     borderWidth: 1,
     marginBottom: 5
   }}>
-    {blog.title} {blog.author}
-    <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
-    <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
-    <div style={showWhenVisible}>
+    <p><span>{blog.title}</span> <span>{blog.author}</span>
+      <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
+      <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
+    </p>
+    <div style={showWhenVisible} className='togglable'>
       <div>
         <p>{blog.url}</p>
         <p>likes {blog.likes} <><button onClick={() => { like(blog) }}>like</button></></p>
