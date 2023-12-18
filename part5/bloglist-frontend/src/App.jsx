@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import CreateBlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -19,14 +20,31 @@ const Notification = ({ message }) => {
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [newBlog, setNewBlog] = useState({})
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [message, setMessage] = useState({ 'content': null, 'type': 'success' })
 
+
+  const setAndSortBlogs = (blogs) => {
+    const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
+    setBlogs(sortedBlogs)
+  }
+
+  const concatBlogs = (blogObject) => {
+    blogObject.user = user
+    const newBlogs = blogs.concat(blogObject)
+    setAndSortBlogs(newBlogs)
+  }
+
+  const removeBlog = (blog) => {
+    console.log('remove blog', blog)
+    const newBlogs = blogs.filter(b => b.id !== blog.id)
+    setBlogs(newBlogs)
+  }
+
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
@@ -35,8 +53,9 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
+    blogService.getAll().then(blogs => {
+      setAndSortBlogs(blogs)
+    }
     )
   }, [])
 
@@ -50,7 +69,7 @@ const App = () => {
       })
 
       window.localStorage.setItem(
-        'loggedNoteappUser', JSON.stringify(user)
+        'loggedBlogappUser', JSON.stringify(user)
       )
       blogService.setToken(user.token)
       setUser(user)
@@ -65,25 +84,10 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedNoteappUser')
+    window.localStorage.removeItem('loggedBlogappUser')
     setUser(null)
   }
 
-  const addBlog = async (event) => {
-    event.preventDefault()
-
-    try {
-      const savedBlog = await blogService.create(newBlog)
-
-      setBlogs(blogs.concat(savedBlog))
-      setMessage({ 'content': `a new blog ${savedBlog.title} by ${savedBlog.author} added`, 'type': 'success' })
-    } catch (exception) {
-      setMessage({ 'content': 'could not add blog', 'type': 'error' })
-      setTimeout(() => {
-        setMessage({ 'content': null, 'type': 'success' })
-      }, 3000)
-    }
-  }
 
   const loginForm = () => (
     <div>
@@ -112,48 +116,15 @@ const App = () => {
     </div>
   )
 
-  const createBlogForm = () => (
-    <div>
-      <h2>create new</h2>
-      <form onSubmit={addBlog}>
-        <div>
-          title:
-          <input
-            type="text"
-            value={newBlog.title}
-            name="Title"
-            onChange={({ target }) => setNewBlog({ ...newBlog, title: target.value })}
-          />
-        </div>
-        <div>
-          author:
-          <input
-            type="text"
-            value={newBlog.author}
-            name="Author"
-            onChange={({ target }) => setNewBlog({ ...newBlog, author: target.value })}
-          />
-        </div>
-        <div>
-          url:
-          <input
-            type="text"
-            value={newBlog.url}
-            name="Url"
-            onChange={({ target }) => setNewBlog({ ...newBlog, url: target.value })}
-          />
-        </div>
-        <button type="submit">create</button>
-      </form>
-    </div>
-  )
+
+
 
   const blogList = () => (
     <div>
       <h2>blogs</h2>
       <p>{user.name} logged in <button onClick={() => handleLogout()}>logout</button></p>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} setMessage={setMessage} removeBlog={removeBlog} />
       )}
     </div>
   )
@@ -162,8 +133,8 @@ const App = () => {
     <div>
       <Notification message={message} />
       {!user && loginForm()}
-      {user && createBlogForm()}
       {user && blogList()}
+      {user && <CreateBlogForm concatBlogs={concatBlogs} setMessage={setMessage} />}
     </div>
   )
 }

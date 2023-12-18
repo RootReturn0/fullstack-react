@@ -47,12 +47,13 @@ blogsRouter.put('/:id', async (request, response, next) => {
         title: body.title,
         author: body.author,
         url: body.url,
-        likes: body.likes
+        likes: body.likes,
+        user: body.user? body.user.id : request.user._id
     }
 
     const originalBlog = await Blog.findById(request.params.id)
 
-    if (originalBlog.user.toString() !== request.user._id.toString()) {
+    if (originalBlog.user.toString() !== blog.user.toString()) {
         return response.status(401).json({ error: 'invalid user' })
     }
     await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
