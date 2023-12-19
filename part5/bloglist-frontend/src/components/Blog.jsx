@@ -40,23 +40,19 @@ const Blog = ({ blog, setMessage, removeBlog, updateBlog }) => {
     border: 'solid',
     borderWidth: 1,
     marginBottom: 5
-  }}>
-    <p><span>{blog.title}</span> <span>{blog.author}</span>
+  }} className='blog'>
+    <p>{blog.title} {blog.author}
       <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
       <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
     </p>
     <div style={showWhenVisible} className='togglable'>
       <div>
         <p>{blog.url}</p>
-        <p>likes {blog.likes} <><button onClick={() => { like(blog) }}>like</button></></p>
+        <p>likes {blog.likes} <button onClick={() => { like(blog) }}>like</button></p>
         <p>{blogUser ? blogUser.name : ''}</p>
       </div>
     </div>
-    <div style={{ display: deleteVisible ? '' : 'none' }}>
-      <button onClick={() => {
-        remove(blog)
-      }}>remove</button>
-    </div>
+    {deleteVisible && <button onClick={() => { remove(blog) }}>remove</button>}
   </div>
 }
 
