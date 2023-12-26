@@ -17,9 +17,9 @@ const asObject = (anecdote) => {
   }
 }
 
-const initialState = anecdotesAtStart.map(asObject)
+export const initialState = anecdotesAtStart.map(asObject)
 
-const reducer = (state = initialState, action) => {
+const anecdoteReducer = (state = initialState, action) => {
   console.log('state now: ', state)
   console.log('action', action)
 
@@ -34,9 +34,6 @@ const reducer = (state = initialState, action) => {
     case 'NEW_ANECDOTE':
       return [...state, action.payload]
 
-    case 'INIT_ANECDOTES':
-      return action.payload
-    
     default:
       return state
   }
@@ -58,4 +55,4 @@ export const newAnecdote = (content) => {
   }
 }
 
-export default reducer
+export default anecdoteReducer
